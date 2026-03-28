@@ -4,8 +4,7 @@ package com.sahil.user_service.controller;
 import com.sahil.user_service.dto.EmployeeRequest;
 import com.sahil.user_service.dto.EmployeeResponse;
 import com.sahil.user_service.model.AuditLog;
-import com.sahil.user_service.model.Employee;
-import com.sahil.user_service.service.EmployeeService;
+import com.sahil.user_service.service.EmployeeServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmployeeController {
 
-    private final EmployeeService employeeService;
+    private final EmployeeServiceImpl employeeService;
 
     @PostMapping
     public ResponseEntity<EmployeeResponse> create(
