@@ -1,4 +1,4 @@
-package com.sahil.user_service.exceprion;
+package com.sahil.user_service.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +25,12 @@ public class GlobalExceptionHandler {
             ResourceNotFoundException ex
     ){
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error",ex.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<Map<String,String>> handleDuplicateEmail(DuplicateEmailException ex){
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error",ex.getMessage()));
     }
 }

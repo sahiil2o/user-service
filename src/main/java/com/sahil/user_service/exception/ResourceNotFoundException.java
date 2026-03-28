@@ -1,4 +1,4 @@
-package com.sahil.user_service.exceprion;
+package com.sahil.user_service.exception;
 
 public class ResourceNotFoundException extends RuntimeException{
     public ResourceNotFoundException(String message) {

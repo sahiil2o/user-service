@@ -1,5 +1,6 @@
 package com.sahil.user_service.service;
 
+import com.sahil.user_service.dto.AuditLogResponse;
 import com.sahil.user_service.dto.EmployeeRequest;
 import com.sahil.user_service.dto.EmployeeResponse;
 
@@ -11,4 +12,5 @@ public interface EmployeeService {
     List<EmployeeResponse> getAllEmployees();
     EmployeeResponse updateEmployee(Long id, EmployeeRequest employeeRequest);
     void  deleteEmployee(Long id);
+    List<AuditLogResponse> getAuditLogs();
 }

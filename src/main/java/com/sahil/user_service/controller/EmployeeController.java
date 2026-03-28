@@ -1,6 +1,7 @@
 package com.sahil.user_service.controller;
 
 
+import com.sahil.user_service.dto.AuditLogResponse;
 import com.sahil.user_service.dto.EmployeeRequest;
 import com.sahil.user_service.dto.EmployeeResponse;
 import com.sahil.user_service.model.AuditLog;
@@ -49,7 +50,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/audit-logs")
-    public ResponseEntity<List<AuditLog>> getAuditLogs() {
+    public ResponseEntity<List<AuditLogResponse>> getAuditLogs() {
         return ResponseEntity.ok(employeeService.getAuditLogs());
     }
 

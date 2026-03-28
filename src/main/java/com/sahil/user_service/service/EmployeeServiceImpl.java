@@ -1,9 +1,11 @@
 package com.sahil.user_service.service;
 
+import com.sahil.user_service.dto.AuditLogResponse;
 import com.sahil.user_service.dto.EmployeeRequest;
 import com.sahil.user_service.dto.EmployeeResponse;
 import com.sahil.user_service.dto.RoleResponse;
-import com.sahil.user_service.exceprion.ResourceNotFoundException;
+import com.sahil.user_service.exception.DuplicateEmailException;
+import com.sahil.user_service.exception.ResourceNotFoundException;
 import com.sahil.user_service.model.AuditLog;
 import com.sahil.user_service.model.Employee;
 import com.sahil.user_service.repository.AuditLogRepository;
@@ -27,11 +29,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     private String roleServiceBaseUrl;
 
     public EmployeeResponse createEmployee(EmployeeRequest request){
-        Employee emp = new Employee();
-        emp.setName(request.getName());
-        emp.setEmail(request.getEmail());
-        emp.setDepartment(request.getDepartment());
-        emp.setRole(request.getRole());
+        //check if Email is Duplicate before modifying emp
+        if(employeeRepository.existsByEmail(request.getEmail())){
+            throw new DuplicateEmailException("Employee with email already exists");
+        }
+        //validate role before saving
         RoleResponse role = restTemplate.getForObject(
                 roleServiceBaseUrl + "/api/roles/name/{name}",
                 RoleResponse.class,
@@ -41,6 +43,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (role == null) {
             throw new ResourceNotFoundException("Role not found: " + request.getRole());
         }
+        Employee emp = new Employee();
+        emp.setName(request.getName());
+        emp.setEmail(request.getEmail());
+        emp.setDepartment(request.getDepartment());
+        emp.setRole(request.getRole());
+
         Employee saved = employeeRepository.save(emp);
 
         auditLogRepository.save(new AuditLog("CREATE",saved.getName()));
@@ -66,19 +74,25 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseThrow(()-> new ResourceNotFoundException(
                         "Employee not found with id " + id
                 ));
-        emp.setName(request.getName());
-        emp.setEmail(request.getEmail());
-        emp.setDepartment(request.getDepartment());
-        emp.setRole(request.getRole());
+        //check if Email is Duplicate before modifying emp
+        if (!emp.getEmail().equals(request.getEmail())
+                && employeeRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateEmailException("Employee with email already exists");
+        }
+        //validate role before saving
         RoleResponse role = restTemplate.getForObject(
                 roleServiceBaseUrl + "/api/roles/name/{name}",
                 RoleResponse.class,
                 request.getRole()
         );
-
         if (role == null) {
             throw new ResourceNotFoundException("Role not found: " + request.getRole());
         }
+        emp.setName(request.getName());
+        emp.setEmail(request.getEmail());
+        emp.setDepartment(request.getDepartment());
+        emp.setRole(request.getRole());
+
         Employee updated = employeeRepository.save(emp);
         auditLogRepository.save(new AuditLog("UPDATE",updated.getName()));
 
@@ -95,8 +109,19 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
 
-    public List<AuditLog> getAuditLogs(){
-        return auditLogRepository.findAll();
+    public List<AuditLogResponse> getAuditLogs(){
+        return auditLogRepository.findAll()
+                .stream()
+                .map(log ->{
+                    AuditLogResponse res = new AuditLogResponse();
+                    res.setId(log.getId());
+                    res.setAction(log.getAction());
+                    res.setEmployeeName(log.getEmployeeName());
+                    res.setPerformedBy(log.getPerformedBy());
+                    res.setTimestamp(log.getTimestamp());
+                    return res;
+                })
+                .toList();
     }
 
     private EmployeeResponse toResponse(Employee emp){
