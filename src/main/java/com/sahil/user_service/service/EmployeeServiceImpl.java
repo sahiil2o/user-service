@@ -13,6 +13,7 @@ import com.sahil.user_service.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Value("${role.service.base-url}")
     private String roleServiceBaseUrl;
 
+    @Transactional
     public EmployeeResponse createEmployee(EmployeeRequest request){
         //check if Email is Duplicate before modifying emp
         if(employeeRepository.existsByEmail(request.getEmail())){
@@ -55,12 +57,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return toResponse(saved);
     }
-
+    @Transactional(readOnly = true)
     public List<EmployeeResponse> getAllEmployees(){
         return employeeRepository.findAll()
                 .stream().map(this::toResponse).toList();
     }
-
+    @Transactional(readOnly = true)
     public EmployeeResponse getEmployeeById(Long id){
         Employee emp = employeeRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException(
@@ -68,7 +70,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 ));
         return toResponse(emp);
     }
-
+    @Transactional
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest request){
         Employee emp = employeeRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException(
@@ -99,6 +101,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             return toResponse(updated);
     }
 
+    @Transactional
     public void deleteEmployee(Long id){
         Employee emp = employeeRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException(
@@ -108,7 +111,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.deleteById(id);
     }
 
-
+    @Transactional(readOnly = true)
     public List<AuditLogResponse> getAuditLogs(){
         return auditLogRepository.findAll()
                 .stream()
